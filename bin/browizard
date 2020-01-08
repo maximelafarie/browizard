@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+var bro = require('../browizard.js');
+
+// Launch the Wizard !!
+bro.wizard;

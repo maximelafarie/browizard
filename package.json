@@ -1,0 +1,74 @@
+{
+  "name": "browizard",
+  "version": "0.2.3",
+  "description": "A javascript browser compatibility checker based on Caniuse data",
+  "main": "browizard.js",
+  "scripts": {
+    "build": "node build.js",
+    "build-ts": "webpack --mode production",
+    "lint-ts": "tslint -c tslint.json -t stylish src/**/*.ts",
+    "publish-lib": "npm publish ./dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch-ts": "webpack --watch --mode development"
+  },
+  "preferGlobal": true,
+  "engines": {
+    "node": ">=8"
+  },
+  "bin": {
+    "browizard": "./bin/browizard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maximelafarie/browser-spector.git"
+  },
+  "keywords": [
+    "caniuse",
+    "browser",
+    "mdn",
+    "inspector",
+    "browser",
+    "browizard",
+    "compatibility",
+    "checker"
+  ],
+  "author": "Maxime Lafarie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maximelafarie/browser-spector/issues"
+  },
+  "homepage": "https://github.com/maximelafarie/browser-spector#readme",
+  "dependencies": {
+    "acorn": "^7.1.0",
+    "acorn-bigint": "^0.4.0",
+    "acorn-jsx": "^5.1.0",
+    "acorn-walk": "^7.0.0",
+    "chalk": "^3.0.0",
+    "cli-progress": "^3.4.0",
+    "event-stream": "^4.0.1",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "mdn-browser-compat-data": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/acorn": "^4.0.5",
+    "@types/caniuse-lite": "^1.0.0",
+    "@types/cli-progress": "^1.8.1",
+    "@types/event-stream": "^3.3.34",
+    "@types/express": "^4.17.2",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12.12.17",
+    "shelljs": "^0.8.3",
+    "ts-loader": "^6.2.1",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.3",
+    "uglify-js": "^3.7.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "files": [
+    "bin",
+    "browizard.js"
+  ]
+}
