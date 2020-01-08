@@ -1,3 +1,5 @@
+<img src="assets/logo.png" width="300" />
+
 # browizard
 A javascript browser compatibility checker based on Caniuse data
 
