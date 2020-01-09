@@ -17,6 +17,13 @@ const walk = require('acorn-walk');
 const progress = require('cli-progress');
 const colors = require('colors');
 
+// // create new progress bars
+const multibar = new progress.MultiBar({
+    fps: 5,
+    format: '[{bar}] | {filename} | {value}/{total}',
+    stopOnComplete: true
+}, progress.Presets.rect);
+
 // Script time execution measurement
 const start = new Date();
 
@@ -40,15 +47,13 @@ if (isSilent) {
 }
 
 // Little sexy branding log ;)
-// tslint:disable:no-trailing-whitespace
 console.log(`
-▄▄▄▄· ▄▄▄        ▄▄▌ ▐ ▄▌▪  ·▄▄▄▄• ▄▄▄· ▄▄▄  ·▄▄▄▄  
-▐█ ▀█▪▀▄ █·▪     ██· █▌▐███ ▪▀·.█▌▐█ ▀█ ▀▄ █·██▪ ██ 
+▄▄▄▄· ▄▄▄        ▄▄▌ ▐ ▄▌▪  ·▄▄▄▄• ▄▄▄· ▄▄▄  ·▄▄▄▄
+▐█ ▀█▪▀▄ █·▪     ██· █▌▐███ ▪▀·.█▌▐█ ▀█ ▀▄ █·██▪ ██
 ▐█▀▀█▄▐▀▀▄  ▄█▀▄ ██▪▐█▐▐▌▐█·▄█▀▀▀•▄█▀▀█ ▐▀▀▄ ▐█· ▐█▌
-██▄▪▐█▐█•█▌▐█▌.▐▌▐█▌██▐█▌▐█▌█▌▪▄█▀▐█ ▪▐▌▐█•█▌██. ██ 
-·▀▀▀▀ .▀  ▀ ▀█▄▀▪ ▀▀▀▀ ▀▪▀▀▀·▀▀▀ • ▀  ▀ .▀  ▀▀▀▀▀▀• 
+██▄▪▐█▐█•█▌▐█▌.▐▌▐█▌██▐█▌▐█▌█▌▪▄█▀▐█ ▪▐▌▐█•█▌██. ██
+·▀▀▀▀ .▀  ▀ ▀█▄▀▪ ▀▀▀▀ ▀▪▀▀▀·▀▀▀ • ▀  ▀ .▀  ▀▀▀▀▀▀•
 `);
-// tslint:enable:no-trailing-whitespace
 
 // For debug purposes. Allow logs to display full data
 util.inspect.defaultOptions.maxArrayLength = null;
@@ -101,12 +106,6 @@ function thresholdIsValid(base: any, threshold: any): boolean {
     return false;
 }
 
-// // create new progress bar
-// const b1 = new _progress.SingleBar({}, _progress.Presets.shades_classic);
-
-// // // initialize the bar - (total, starting value)
-// b1.start(100, 0);
-
 function getArgs() {
     const args: any = {};
     process.argv
@@ -141,9 +140,14 @@ const wizard = () => {
         const filesToCheck = files.filter((file) =>
             !fs.lstatSync(`${_PATH}/${file}`).isDirectory() && file.match(new RegExp(/([a-zA-Z0-9\s_\\.\-\(\):])+(.js|.jsx)$/, 'i')));
 
+        // initialize progress bars - (total, starting value)
+        let progressBars = <any>[];
+
         // listing all files using forEach
         filesToCheck.forEach((file, index) => {
             // Do whatever you want to do with the file
+            const b = multibar.create(100, 0);
+            progressBars.push(b);
 
             let lineNr = 0;
             const filePath = `${_PATH}/${file}`;
@@ -159,7 +163,13 @@ const wizard = () => {
                     // Check supported browser versions for each prototypes
                     const protos = getFunctionNames(line);
 
-                    protos.forEach((protoName) => {
+                    // Set total protos on the file
+                    progressBars[index].setTotal(protos.length);
+
+                    protos.forEach((protoName, protoIndex) => {
+                        // Increment progress bar value
+                        progressBars[index].update(protoIndex + 1, { filename: file });
+
                         // If proto not already analyzed
                         if (!exploredProtos.includes(protoName)) {
                             exploredProtos.push(protoName); // Add explored proto to not analyze it twice
@@ -195,27 +205,19 @@ const wizard = () => {
 
                     // resume the readstream, possibly from a callback
                     s.resume();
-
-                    // b1.update(((index+1) / filesToCheck.length) * 100);
                 })
                     .on('error', (error) => {
-                        console.log(`Error while reading file ${file} ❌`, error);
+                        console.log('\n' + `Error while reading file ${file} ❌` + '\n', error);
                     })
                     .on('end', () => {
-                        console.log(`Read entire file ${file} ✅`);
+                        progressBars[index].update(progressBars[index].value, {filename: file + ' ✅'});
                     })
                 );
-
-            // Stop the loader
-            // b1.stop();
         });
     });
 };
 
 process.on('beforeExit', (code) => {
-    // stop the bar
-    // bar1.stop();
-
     console.log('Minimal supported versions for scanned files are:', report);
 
     if (!!_THRESHOLD) {
