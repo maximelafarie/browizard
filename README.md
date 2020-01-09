@@ -86,3 +86,6 @@ In main cases, other properties versions are overriding this error... but it is 
 Example:
 
 The MDN API returns minimal browsers versions for a given function. But in some cases (as you can see in the return example above) it will return versions with a special char like `≤`. In this case, it won't be possible to compare the versions given in the threshold with the ones given by the MDN API.
+
+
+**So be careful if you want to break your CI execution if the threshold doesn't match the one you provided. It may be better using it for retriving minimal supported versions for your project.**
