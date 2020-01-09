@@ -1,4 +1,4 @@
-<img src="assets/logo.png" width="300" />
+<img src="assets/logo.png" width="500" />
 
 # browizard
 A javascript browser compatibility checker based on Caniuse data
