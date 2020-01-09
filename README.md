@@ -1,6 +1,6 @@
 <img src="assets/logo.png" width="500" />
 
-# browizard
+# Browizard
 A javascript browser compatibility checker based on Caniuse data
 
 # How to start
@@ -69,14 +69,14 @@ Browizard (whatever how cool it is) isn't 100% reliable. Two main warning points
 Example:
 
 In one of your files, there is the `indexOf` function. The scripts find it and checks the MDN API for minimal browser support versions. The dilemma is that there is three types of `indexOf` property:
-* for Arrays
-* for Strings
-* for TypedArrays
+* for `Arrays`
+* for `Strings`
+* for `TypedArrays`
 
 But the support version isn't the same for a similar property (for the same browser!), so here's the limit:
-* Arrays: Chrome >=1
-* Strings: Chrome >=1
-* TypedArrays: Chrome >=45
+* `Arrays`: `Chrome >=1`
+* `Strings`: `Chrome >=1`
+* `TypedArrays`: `Chrome >=45`
 
 So if the `indexOf` prop scanned by the script in one of your files is for a `TypedArray`, the script will take the `Array` prop and will return a minimal version for Chrome of 1.
 
