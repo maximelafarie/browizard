@@ -1,13 +1,21 @@
 <img src="assets/logo.png" width="500" />
 
-# Browizard
+[![npm version](https://badge.fury.io/js/browizard.svg)](https://badge.fury.io/js/browizard)
+[![npm downloads](https://img.shields.io/npm/dm/browizard.svg)](https://npmjs.org/browizard)
+
+# browizard
 A javascript browser compatibility checker based on Caniuse data
 
-# How to start
+# Install
+It's better to install browizard globally on your machine:
+
+`npm i -g browizard`
+
+# How to use
 You can run browizard directly in a folder to scan, or provide a remote directory like this:
 
 ```
-npx browizard --directory|d=<DIRECTORY-PATH>
+browizard --directory|d=<DIRECTORY-PATH>
 ```
 
 # Thresholds
@@ -17,7 +25,7 @@ The script will return a `0` exit code if succeed, else `1`.
 
 You can pass thresholds like the following (be sure to pass [a valid](https://jsonlint.com/) JSON object **between simple quotes**):
 ```
-npx browizard --threshold|t='{"chrome": "60", "firefox": "55", "edge": "16"}'
+browizard --threshold|t='{"chrome": "60", "firefox": "55", "edge": "16"}'
 ```
 
 It will either return a success message like: `Threshold validity check terminated successfully` or a detailed error message like: `Invalid threshold on chrome. Expected: 60 or less, current: 70.` with an exit code `1` (so it can be used in CIs).
