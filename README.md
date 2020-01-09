@@ -1,6 +1,6 @@
-<img src="assets/logo.png" width="300" />
+<img src="assets/logo.png" width="500" />
 
-# browizard
+# Browizard
 A javascript browser compatibility checker based on Caniuse data
 
 # How to start
@@ -60,3 +60,32 @@ You've got:
 * The threshold check status (if option provided to the command)
 * The process exit code (0 = success | > 0 = error)
 * The script execution time
+
+# Why you should be aware using it
+
+Browizard (whatever how cool it is) isn't 100% reliable. Two main warning points:
+
+### It only crawls your files and take the **first** entry returned by the MDN API
+Example:
+
+In one of your files, there is the `indexOf` function. The scripts find it and checks the MDN API for minimal browser support versions. The dilemma is that there is three types of `indexOf` property:
+* for `Arrays`
+* for `Strings`
+* for `TypedArrays`
+
+But the support version isn't the same for a similar property (for the same browser!), so here's the limit:
+* `Arrays`: `Chrome >=1`
+* `Strings`: `Chrome >=1`
+* `TypedArrays`: `Chrome >=45`
+
+So if the `indexOf` prop scanned by the script in one of your files is for a `TypedArray`, the script will take the `Array` prop and will return a minimal version for Chrome of 1.
+
+In main cases, other properties versions are overriding this error... but it is present!
+
+### It's not possible to threshold versions with special chars
+Example:
+
+The MDN API returns minimal browsers versions for a given function. But in some cases (as you can see in the return example above) it will return versions with a special char like `≤`. In this case, it won't be possible to compare the versions given in the threshold with the ones given by the MDN API.
+
+
+**So be careful if you want to break your CI execution if the threshold doesn't match the one you provided. It may be better using it for retriving minimal supported versions for your project.**

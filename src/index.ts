@@ -36,10 +36,11 @@ const isSilent = !!_SILENT && _SILENT !== 'false';
 
 // Messy way to disable logs if silent mode activated
 if (isSilent) {
-    console.log = () => {};
+    console.log = () => { return; };
 }
 
 // Little sexy branding log ;)
+// tslint:disable:no-trailing-whitespace
 console.log(`
 ▄▄▄▄· ▄▄▄        ▄▄▌ ▐ ▄▌▪  ·▄▄▄▄• ▄▄▄· ▄▄▄  ·▄▄▄▄  
 ▐█ ▀█▪▀▄ █·▪     ██· █▌▐███ ▪▀·.█▌▐█ ▀█ ▀▄ █·██▪ ██ 
@@ -47,6 +48,7 @@ console.log(`
 ██▄▪▐█▐█•█▌▐█▌.▐▌▐█▌██▐█▌▐█▌█▌▪▄█▀▐█ ▪▐▌▐█•█▌██. ██ 
 ·▀▀▀▀ .▀  ▀ ▀█▄▀▪ ▀▀▀▀ ▀▪▀▀▀·▀▀▀ • ▀  ▀ .▀  ▀▀▀▀▀▀• 
 `);
+// tslint:enable:no-trailing-whitespace
 
 // For debug purposes. Allow logs to display full data
 util.inspect.defaultOptions.maxArrayLength = null;
