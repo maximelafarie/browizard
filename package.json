@@ -48,7 +48,8 @@
     "event-stream": "^4.0.1",
     "express": "^4.17.1",
     "lodash": "^4.17.15",
-    "mdn-browser-compat-data": "^1.0.2"
+    "mdn-browser-compat-data": "^1.0.2",
+    "semver-compare": "^1.0.0"
   },
   "devDependencies": {
     "@types/acorn": "^4.0.5",

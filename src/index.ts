@@ -17,12 +17,17 @@ const walk = require('acorn-walk');
 const progress = require('cli-progress');
 const colors = require('colors');
 
-// // create new progress bars
+// Create new progress bars
 const multibar = new progress.MultiBar({
-    fps: 5,
     format: '[{bar}] | {filename} | {value}/{total}',
+    fps: 5,
     stopOnComplete: true
 }, progress.Presets.rect);
+
+// Semver comparator
+// cmp(a,b) : If the semver string a is greater than b, return 1. If the semver string b is 
+// greater than a, return -1. If a equals b, return 0;
+const cmp = require('semver-compare');
 
 // Script time execution measurement
 const start = new Date();
@@ -36,7 +41,7 @@ const _THRESHOLD = givenArgs.t || givenArgs.threshold || undefined;
 let report: any = null;
 const exploredProtos: string[] = [];
 
-// joining path of directory
+// Joining path of directory
 const directoryPath = path.join(process.cwd(), _PATH);
 
 const isSilent = !!_SILENT && _SILENT !== 'false';
@@ -189,10 +194,36 @@ const wizard = () => {
                                 if (_.isNil(report)) {
                                     report = obj;
                                 } else {
+
+                                    if (protoName === 'copyWithin') {
+                                        console.log('OBJ', _.cloneDeep(obj));
+                                    }
+
                                     Object.keys(report).forEach((key: string) => {
-                                        if (obj[key] > report[key]) {
-                                            report[key] = obj[key];
+                                        console.log(key, typeof obj[key], typeof report[key], obj[key], report[key]);
+
+                                        if (_.isString(obj[key]) && _.isString(report[key])) {
+                                            // If value is a valid semver
+
+                                            // Remove potential invalid leading char like `≤37`
+                                            if (isNaN(parseInt(obj[key].charAt(0)))) {
+                                                obj[key] = obj[key].substring(1);
+                                            }
+
+                                            if (cmp(obj[key], report[key]) === 1) {
+                                                report[key] = obj[key];
+                                            }
+                                        } else {
+                                            // If value is boolean
+                                            if (obj[key] === false) {
+                                                report[key] = obj[key]
+                                            } else {
+                                                if (_.isNil(report[key])) {
+                                                    report[key] = obj[key]
+                                                }
+                                            }
                                         }
+
                                     });
                                 }
                             }
@@ -206,6 +237,9 @@ const wizard = () => {
                     // resume the readstream, possibly from a callback
                     s.resume();
                 })
+                    .on('data', (data) => {
+                        console.log('data', data);
+                    })
                     .on('error', (error) => {
                         console.log('\n' + `Error while reading file ${file} ❌` + '\n', error);
                     })
