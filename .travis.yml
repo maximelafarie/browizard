@@ -19,3 +19,5 @@ deploy:
     tags: true
     repo: maximelafarie/browizard
     branch: master
+after_deploy:
+  - cat /home/travis/.npm/_logs/*-debug.log
