@@ -1,5 +1,6 @@
 <img src="assets/logo.png" width="500" />
 
+[![Build Status](https://travis-ci.org/maximelafarie/browizard.svg?branch=master)](https://travis-ci.org/maximelafarie/browizard)
 [![npm version](https://badge.fury.io/js/browizard.svg)](https://badge.fury.io/js/browizard)
 [![npm downloads](https://img.shields.io/npm/dm/browizard.svg)](https://npmjs.org/browizard)
 
