@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - stable
+install:
+  - npm install
+script:
+  - npm run lint-ts
+  - npm run build
+
+deploy:
+  provider: npm
+  email: $NPM_EMAIL
+  api_key: $NPM_AUTH_TOKEN
+  local_dir: dist
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master

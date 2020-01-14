@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.js",
     "build-ts": "webpack --mode production",
-    "lint-ts": "tslint -c tslint.json -t stylish src/**/*.ts",
+    "lint-ts": "tslint -c tslint.json 'src/**/*.ts'",
     "publish-lib": "npm publish ./dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch-ts": "webpack --watch --mode development"
@@ -48,7 +48,8 @@
     "event-stream": "^4.0.1",
     "express": "^4.17.1",
     "lodash": "^4.17.15",
-    "mdn-browser-compat-data": "^1.0.2"
+    "mdn-browser-compat-data": "^1.0.2",
+    "semver-compare": "^1.0.0"
   },
   "devDependencies": {
     "@types/acorn": "^4.0.5",

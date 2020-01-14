@@ -1,4 +1,4 @@
-import acorn = require("acorn");
+import acorn = require('acorn');
 import chalk = require('chalk');
 import es = require('event-stream');
 import fs = require('fs');
@@ -17,29 +17,44 @@ const walk = require('acorn-walk');
 const progress = require('cli-progress');
 const colors = require('colors');
 
-// // create new progress bars
+// Create new progress bars
 const multibar = new progress.MultiBar({
-    fps: 5,
     format: '[{bar}] | {filename} | {value}/{total}',
+    fps: 5,
     stopOnComplete: true
 }, progress.Presets.rect);
+
+// Semver comparator
+// cmp(a,b) : If the semver string a is greater than b, return 1. If the semver string b is
+// greater than a, return -1. If a equals b, return 0;
+const cmp = require('semver-compare');
 
 // Script time execution measurement
 const start = new Date();
 
 // Retrieve arguments passed to the script
 const givenArgs = getArgs();
-const _PATH = givenArgs.d || givenArgs.directory || undefined;
 const _SILENT = givenArgs.s || givenArgs.silent || undefined;
+const _PATH = givenArgs.d || givenArgs.directory || undefined;
+const _EXCLUDE = givenArgs.e || givenArgs.exclude || undefined;
 const _THRESHOLD = givenArgs.t || givenArgs.threshold || undefined;
+const _BUFFERSIZE = givenArgs.b || givenArgs.buffersize || undefined;
 
 let report: any = null;
 const exploredProtos: string[] = [];
 
-// joining path of directory
+// Joining path of directory
 const directoryPath = path.join(process.cwd(), _PATH);
 
 const isSilent = !!_SILENT && _SILENT !== 'false';
+
+// Size of a chunk for readStream
+// Default: 16384 (16kb), or 16 for objectMode streams
+// documentation: https://nodejs.org/api/stream.html#stream_constructor_new_stream_writable_options
+const bufferSize = !isNaN(parseInt(_BUFFERSIZE, 10)) ? parseInt(_BUFFERSIZE, 10) : null;
+
+// Given RegExp for file exclusion
+const fileExclusionRegExp: string = _EXCLUDE;
 
 // Messy way to disable logs if silent mode activated
 if (isSilent) {
@@ -137,11 +152,17 @@ const wizard = () => {
             return console.log('Unable to scan directory: ' + err);
         }
 
-        const filesToCheck = files.filter((file) =>
-            !fs.lstatSync(`${_PATH}/${file}`).isDirectory() && file.match(new RegExp(/([a-zA-Z0-9\s_\\.\-\(\):])+(.js|.jsx)$/, 'i')));
+        let filesToCheck = files.filter((file) =>
+            !fs.lstatSync(`${_PATH}/${file}`).isDirectory() &&
+            file.match(new RegExp(/([a-zA-Z0-9\s_\\.\-\(\):])+(.js|.jsx)$/, 'i')));
+
+        // Do additional filtering if file exclusion provided
+        if (!!fileExclusionRegExp && fileExclusionRegExp.length) {
+            filesToCheck = filesToCheck.filter((file) => !file.match(new RegExp(fileExclusionRegExp, 'i')));
+        }
 
         // initialize progress bars - (total, starting value)
-        let progressBars = <any>[];
+        const progressBars = <any>[];
 
         // listing all files using forEach
         filesToCheck.forEach((file, index) => {
@@ -152,7 +173,7 @@ const wizard = () => {
             let lineNr = 0;
             const filePath = `${_PATH}/${file}`;
 
-            const s = fs.createReadStream(filePath)
+            const s = fs.createReadStream(filePath, { highWaterMark: bufferSize })
                 .pipe(es.split())
                 .pipe(es.mapSync((line: any) => {
                     // pause the readstream
@@ -161,6 +182,10 @@ const wizard = () => {
                     lineNr += 1;
 
                     // Check supported browser versions for each prototypes
+                    // Additionally removing newlines from content
+
+                    // Below line is a WIP for read file content in one line
+                    // const protos = getFunctionNames(line.toString().replace(/^[\r\n]+|[\r\n]+$/g, ''));
                     const protos = getFunctionNames(line);
 
                     // Set total protos on the file
@@ -178,8 +203,8 @@ const wizard = () => {
                             if (!!obj) {
                                 // Format object before process
                                 Object.keys(obj).forEach((key: string) => {
-                                    if (_.has(obj[key], 'version_added')) {
-                                        obj[key] = obj[key].version_added;
+                                    if (_.has(obj[key], 'version_removed') || _.has(obj[key], 'version_added')) {
+                                        obj[key] = obj[key].version_removed || obj[key].version_added;
                                     } else {
                                         delete obj[key];
                                     }
@@ -189,10 +214,35 @@ const wizard = () => {
                                 if (_.isNil(report)) {
                                     report = obj;
                                 } else {
+
+                                    if (protoName === 'copyWithin') {
+                                        console.log('OBJ', _.cloneDeep(obj));
+                                    }
+
                                     Object.keys(report).forEach((key: string) => {
-                                        if (obj[key] > report[key]) {
-                                            report[key] = obj[key];
+
+                                        if (_.isString(obj[key]) && _.isString(report[key])) {
+                                            // If value is a valid semver
+
+                                            // Remove potential invalid leading char like `≤37`
+                                            if (isNaN(parseInt(obj[key].charAt(0), 10))) {
+                                                obj[key] = obj[key].substring(1);
+                                            }
+
+                                            if (cmp(obj[key], report[key]) === 1) {
+                                                report[key] = obj[key];
+                                            }
+                                        } else {
+                                            // If value is boolean
+                                            if (obj[key] === false) {
+                                                report[key] = obj[key];
+                                            } else {
+                                                if (_.isNil(report[key])) {
+                                                    report[key] = obj[key];
+                                                }
+                                            }
                                         }
+
                                     });
                                 }
                             }
@@ -210,7 +260,7 @@ const wizard = () => {
                         console.log('\n' + `Error while reading file ${file} ❌` + '\n', error);
                     })
                     .on('end', () => {
-                        progressBars[index].update(progressBars[index].value, {filename: file + ' ✅'});
+                        progressBars[index].update(progressBars[index].value, { filename: file + ' ✅' });
                     })
                 );
         });
@@ -231,7 +281,7 @@ process.on('beforeExit', (code) => {
 
     const end = (new Date() as any) - (start as any);
     console.log('Process exited with code: ', code);
-    console.info('Execution time: %dms', end);
+    console.log('Execution time: %dms', end);
 });
 
 module.exports = wizard();
