@@ -10,12 +10,14 @@ A javascript browser compatibility checker based on Caniuse data
 # Install
 It's better to install browizard globally on your machine:
 
-`npm i -g browizard`
+```bash
+npm i -g browizard
+```
 
 # How to use
 You can run browizard directly in a folder to scan, or provide a remote directory like this:
 
-```
+```bash
 browizard --directory|d=<DIRECTORY-PATH>
 ```
 
@@ -25,17 +27,46 @@ You can provide a thresholds for any browser listed below. Any provided browser 
 The script will return a `0` exit code if succeed, else `1`.
 
 You can pass thresholds like the following (be sure to pass [a valid](https://jsonlint.com/) JSON object **between simple quotes**):
-```
+
+```bash
 browizard --threshold|t='{"chrome": "60", "firefox": "55", "edge": "16"}'
 ```
 
 It will either return a success message like: `Threshold validity check terminated successfully` or a detailed error message like: `Invalid threshold on chrome. Expected: 60 or less, current: 70.` with an exit code `1` (so it can be used in CIs).
 
+# Ignoring files
+Sometimes, you simply don't want to check some files. Either because it's not relevant for your test or it simply makes the script fail...
+
+In order to prevent some files to be checked, you can use the `--e` or `--exclude` option. It takes a RegExp string and will try to match the files with `i` flag.
+
+The "file contains" example:
+```bash
+browizard --d=dist/js --e|exclude='chunk|another-file'
+```
+
+The "CSS and SCSS exclusion" example (even though the script already ignore them but **will support them in the future**)
+```bash
+browizard --d=dist/js --e|exclude='([a-zA-Z0-9\s_\\.\-\(\):])+(.css|.scss)$'
+```
+
+# Increase buffer chunk size
+If you're scanning files with very long strings (more that 65000 chars approx.), the script may fail. It's due to the default size of a `readStream` chunk defined in NodeJS. In order to fix that, you can use the `--b` or `--buffersize` option. `String` and `Number` accepted.
+
+Example: 
+```bash
+browizard --d=dist/js --b|buffersize=$(( 128 * 1024 ))
+```
+
+or directly: 
+```bash
+browizard --d=dist/js --b|buffersize='131072'
+```
+
 # How it works
 The script will deep read all of the `.js` files and search for prototypes functions. Then it'll ask the MDN Javascript API for compatibility.
 
 The script outputs something like that:
-```
+```bash
 Read entire file polyfills-es2015.234d8bd921252538356d.js ✅
 Read entire file runtime-es5.465c2333d355155ec5f3.js ✅
 Read entire file runtime-es2015.703a23e48ad83c851e49.js ✅
@@ -70,7 +101,40 @@ You've got:
 * The process exit code (0 = success | > 0 = error)
 * The script execution time
 
-# Why you should be aware using it
+# Troubleshooting & user notice
+
+## The "error while reading" error
+Sometimes, you can fall into this issue:
+
+```bash
+Error while reading file chunk-vendors.63f8bc84.js ❌
+ SyntaxError: Unexpected token (1:5358)
+    at Parser.pp$4.raise (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:2836:15)
+    at Parser.pp.unexpected (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:689:10)
+    at Parser.pp$3.parseExprAtom (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:2260:12)
+    at Parser.pp$3.parseExprSubscripts (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:2089:2)
+    at Parser.pp$3.parseMaybeUnary (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:2066:19)
+    at Parser.pp$3.parseExprOps (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:2010:21)
+    at Parser.pp$3.parseMaybeConditional (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:1993)
+    at Parser.pp$3.parseMaybeAssign (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:1968:21)
+    at Parser.pp$3.parseExpression (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:1933:21)
+    at Parser.pp$1.parseStatement (/Users/maximelafarie2/dev/github/repos/browser-spector/node_modules/acorn/dist/acorn.js:877:47) {
+  pos: 5358,
+  loc: Position { line: 1, column: 5358 },
+  raisedAt: 5358
+}
+[■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■] | about.2868ee64.js ✅ | 11/0
+[■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■] | app.d0da9fcf.js ✅ | 183/0
+[                                        ] | {filename} | 0/100
+```
+
+After some investigations, we found out that it's caused by **newlines** in files. It seems that the `chunk-vendor` file of VueJS build match this case.
+
+So in order to let the script watch your transpiled files (`about`, `app`, ...) you can refer to the [Ignoring files section](#ignoring-files) of this readme.
+
+You'll end up with something like: `browizard --d=dist/js --e='chunk'`. And then the script will skip all files matching your exclusion rule.
+
+## Why you should be aware using this script
 
 Browizard (whatever how cool it is) isn't 100% reliable. Two main warning points:
 
@@ -90,11 +154,5 @@ But the support version isn't the same for a similar property (for the same brow
 So if the `indexOf` prop scanned by the script in one of your files is for a `TypedArray`, the script will take the `Array` prop and will return a minimal version for Chrome of 1.
 
 In main cases, other properties versions are overriding this error... but it is present!
-
-### It's not possible to threshold versions with special chars
-Example:
-
-The MDN API returns minimal browsers versions for a given function. But in some cases (as you can see in the return example above) it will return versions with a special char like `≤`. In this case, it won't be possible to compare the versions given in the threshold with the ones given by the MDN API.
-
 
 **So be careful if you want to break your CI execution if the threshold doesn't match the one you provided. It may be better using it for retriving minimal supported versions for your project.**
