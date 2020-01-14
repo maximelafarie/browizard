@@ -162,7 +162,7 @@ const wizard = () => {
         }
 
         // initialize progress bars - (total, starting value)
-        let progressBars = <any>[];
+        const progressBars = <any>[];
 
         // listing all files using forEach
         filesToCheck.forEach((file, index) => {
@@ -256,14 +256,11 @@ const wizard = () => {
                     // resume the readstream, possibly from a callback
                     s.resume();
                 })
-                    .on('data', (data) => {
-                        console.log('data', data);
-                    })
                     .on('error', (error) => {
                         console.log('\n' + `Error while reading file ${file} ❌` + '\n', error);
                     })
                     .on('end', () => {
-                        progressBars[index].update(progressBars[index].value, {filename: file + ' ✅'});
+                        progressBars[index].update(progressBars[index].value, { filename: file + ' ✅' });
                     })
                 );
         });
