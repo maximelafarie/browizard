@@ -2,14 +2,14 @@ language: node_js
 version: 1.0
 node_js:
 - node
-- lts/*
 install:
   - npm install
 script:
   - npm run lint-ts
   - npm run build
+before_deploy:
+  - cd dist
 deploy:
-  local_dir: dist
   edge: true
   provider: npm
   email: "$NPM_EMAIL"
