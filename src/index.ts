@@ -215,10 +215,6 @@ const wizard = () => {
                                     report = obj;
                                 } else {
 
-                                    if (protoName === 'copyWithin') {
-                                        console.log('OBJ', _.cloneDeep(obj));
-                                    }
-
                                     Object.keys(report).forEach((key: string) => {
 
                                         if (_.isString(obj[key]) && _.isString(report[key])) {
