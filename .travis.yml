@@ -6,13 +6,14 @@ install:
 script:
   - npm run lint-ts
   - npm run build
-
 deploy:
   provider: npm
-  email: $NPM_EMAIL
-  api_key: $NPM_AUTH_TOKEN
   local_dir: dist
   skip_cleanup: true
+  email: $NPM_EMAIL
+  api_key:
+    secure: R0zJLe7CPC9fXN94KwDboKEkvpZpDtPJIT8by/ev5iaL8H61i09GWMB2Arx9XuWjVR7ObzsOlE/sNe6RbSdjLIrub8+oMmXFNfFHFfDaOzBZta/iKITyYyr7SRv8KmIG7kEGwoRJVnjFSBcYAzZ615SJz6RVFNmqbpuU1fDiVNmhfvsI6rGlIJx7fbj5tiqh3JGdoD+Wq106kVhQvw17VbQEBC44bUqXB9bYGA6NLdXhqO55/IxZAjq3Bbm9YHFZHno/eFC+FE7HFCV9dy48I6kxrbp4h0qDeqFr6IApkRtkuaVV3MMtTDOnbZ7P97APzOzsRLmx78pP45tsZQmu9JKV1JAM4YxrL7jbqNmUZ0CHAfA5wgeYYkH0AFJPEda86oyhWqDezd3o/7KiePnaYPAcAKzB8fZry9v6hvWonhwCXbdQdoPnDyY7NXTpRSTGBkzGlWfKgzxT54GP7Jimg5x4tDrnlhvZgbwxMJHBIn3GEMwPQXEzXjdB0evNyAogxlNj+gkXsSzQsuBtrxvTvCxEU4Ijx4GODnFj1D+sbU2ZXa+yb3ljPVaglPy3hSNDDR0RNfUy0TsSElwUFwsruIkvjiE2hZwZIMN9BO1U8PNZugJJCw3B8i0v2DMJs+xoLzYYJ7Uc4XXN+/wbAV8HOTSlpwA+lhAwFRTs5ogCVpw=
   on:
-    branch: master
     tags: true
+    repo: maximelafarie/browizard
+    branch: master
