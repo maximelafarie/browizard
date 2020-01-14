@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/browizard.svg)](https://npmjs.org/browizard)
 
 # browizard
-A javascript browser compatibility checker based on Caniuse data
+A javascript browser compatibility checker based on [MDN API](https://developer.mozilla.org/) data
 
 # Install
 It's better to install browizard globally on your machine:

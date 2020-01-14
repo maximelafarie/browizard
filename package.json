@@ -1,7 +1,7 @@
 {
   "name": "browizard",
   "version": "0.4.0",
-  "description": "A javascript browser compatibility checker based on Caniuse data",
+  "description": "A javascript browser compatibility checker based on MDN data",
   "main": "browizard.js",
   "scripts": {
     "build": "node build.js",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maximelafarie/browser-spector.git"
+    "url": "git+https://github.com/maximelafarie/browizard.git"
   },
   "keywords": [
     "caniuse",
@@ -35,9 +35,9 @@
   "author": "Maxime Lafarie",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/maximelafarie/browser-spector/issues"
+    "url": "https://github.com/maximelafarie/browizard/issues"
   },
-  "homepage": "https://github.com/maximelafarie/browser-spector#readme",
+  "homepage": "https://github.com/maximelafarie/browizard#readme",
   "dependencies": {
     "acorn": "^7.1.0",
     "acorn-bigint": "^0.4.0",
